@@ -91,6 +91,7 @@ class QGPipeline:
             Description : Fonction permettant de générer les réponses.
             Arguments : 
                 - inputs : Inputs.
+            Returns : Les questions générées.
         """
         inputs = self._tokenize(inputs, padding=True, truncation=True)
 
@@ -110,6 +111,9 @@ class QGPipeline:
             Description : Fonction permettant de générer les réponses.
             Arguments : 
                 - context : _x_.
+            Returns : 
+                - sents : Les phrases générées à partir du contexte.
+                - answers : Les réponses générées.
         """
         sents, inputs = self._prepare_inputs_for_ans_extraction(context)
         inputs = self._tokenize(inputs, padding=True, truncation=True)
@@ -142,6 +146,7 @@ class QGPipeline:
                 - truncation : Format des données utilisées par le modèle.
                 - add_special_tokens : Ajout ou non de tokens spéciaux.
                 - max_length : Taille maximale des inputs.
+            Returns : Inputs tokenizés.
         """
         inputs = self.tokenizer.batch_encode_plus(
             inputs,
@@ -159,6 +164,9 @@ class QGPipeline:
             Description : Fonction permettant de préparer les inputs de la tâche de génération de questions à partir des réponses.
             Arguments : 
                 - text : Input du modèle.
+            Returns : 
+                - sents : Les phrases générées à partir du contexte.
+                - inputs : Les inputs préparés pour générer les réponses par la suite.
         """
         sents = sent_tokenize(text)
 
@@ -183,6 +191,7 @@ class QGPipeline:
             Arguments : 
                 - sents : x_x
                 - answers : Réponses crées par le modèle sous le modèle highlight, permettant de générer les questions.
+            Returns : Les inputs préparés pour générer les réponses par la suite avec le mode highlight.
         """
         inputs = []
         for i, answer in enumerate(answers):
@@ -214,6 +223,7 @@ class QGPipeline:
             Arguments : 
                 - context : x_x
                 - answers : Réponses crées par le modèle sous le modèle preprend, permettant de générer les questions.
+            Returns : Les examples préparés pour générer les réponses par la suite avec le mode preprend.
         """
         flat_answers = list(itertools.chain(*answers))
         examples = []
@@ -254,7 +264,13 @@ class MultiTaskQAQGPipeline(QGPipeline):
             return self._extract_answer(inputs["question"], inputs["context"])
 
     def _prepare_inputs_for_qa(self, question, context):
-
+        """
+            Description : Fonction permettant de générer les réponses.
+            Arguments : 
+                - question : Question précédemment générée permettant de d'extracter la réponse.
+                - context : _x_.
+            Returns : Le texte préparé pour la tâche de question answering.
+        """
         source_text = f"question: {question}  context: {context}"
         if self.model_type == "t5":
             source_text = source_text + " </s>"
@@ -264,8 +280,10 @@ class MultiTaskQAQGPipeline(QGPipeline):
         """
             Description : Fonction permettant de générer les réponses.
             Arguments : 
-            - question : Question précédemment générée permettant de d'extracter la réponse.
-            - context : _x_.
+                - question : Question précédemment générée permettant de d'extracter la réponse.
+                - context : _x_.
+            Returns : La réponse à partir d'une question et d'un contexte.
+
         """
         source_text = self._prepare_inputs_for_qa(question, context)
         inputs = self._tokenize([source_text], padding=False)
@@ -353,6 +371,7 @@ class E2EQGPipeline:
             Description : Fonction permettant de tokeniser l'input en vue d'être utilisé par le modèle.
             Arguments : 
                 - context : x_x
+            Returns : Les inputs préparés pour la tâche de End To End question generation.
         """
         source_text = f"generate questions: {context}"
         if self.model_type == "t5":
@@ -378,6 +397,7 @@ class E2EQGPipeline:
                 - truncation : Format des données utilisées par le modèle.
                 - add_special_tokens : Ajout ou non de tokens spéciaux.
                 - max_length : Taille maximale des inputs.
+            Returns : Inputs tokenisés.
         """
         inputs = self.tokenizer.batch_encode_plus(
             inputs,
@@ -459,6 +479,7 @@ def pipeline(
             - ans_model : Modèle servant à la génération de réponses.
             - ans_tokenizer : Tokenizer permettant de tokeniser l'input en vue d'être utilisé par le modèle de génération de réponses précédemment défini.
             - use_cuda : Booleen pour l'utilisation ou non de carte graphique.
+        Returns : Une des 3 différentes classes (parmi les 3 tâches définies dans le fichiers)
         """
     # Retrieve the task
     targeted_task = None
