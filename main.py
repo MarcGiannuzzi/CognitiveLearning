@@ -1,3 +1,5 @@
+#test de push baptiste
+
 from question_answer_generation.pipelines import pipeline
 
 if __name__ == "__main__":
