@@ -90,7 +90,8 @@ def generate_answers_fr(full_answer, number_possible_answers=4):
                 random_position_answer = random.randint(
                     0, int((len(similar_words) - 1) / 2))
             random_indices.append(random_position_answer)
-            other_answer = similar_words[random_position_answer][0]
+            other_answer = similar_words[random_position_answer][0].replace(
+                "_", " ")
             possible_answer = full_answer.replace(true_answer, other_answer, 1)
             possible_answers.append(possible_answer)
 
