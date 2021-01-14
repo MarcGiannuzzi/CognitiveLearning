@@ -7,8 +7,7 @@ def generate_answers(full_answer, lang="english"):
         Description : Fonction permettant de créer plusieurs réponses (fausses) similaires à partir d'une réponse.
         Arguments :
             - full_answer : Réponse dont on veut le QCM (fausse).
-            - voc : Objet vocabulaire d'une langue.
-            - number_possible_answers : Nombre de réponses (fausses) générées.
+            - lang : Langage de full_answer.
         Returns : (blank_answer, possible_answers)
             - all_answers : Dictionnaire contenant LA bonne réponse et une liste de plusieurs autres réponses fausses.
     """
@@ -20,6 +19,6 @@ def generate_answers(full_answer, lang="english"):
 
 
 if __name__ == "__main__":
-    all_answers_test = generate_answers(
-        "Bonjour ! La guerre est terminée !", "french")
-    print(all_answers_test)
+    text = "J'irai manger chez vous demain soir."
+    incorrect_answers = generate_answers(text)
+    print("incorrect_answers : ", incorrect_answers)

@@ -57,16 +57,15 @@ def levenshtein_ratio_and_distance(s, t, ratio_calc=False):
                     cost = 2
                 else:
                     cost = 1
-            distance[row][col] = min(distance[row - 1][col] + 1,  
-                                     distance[row][col - 1] + \
-                                     1,  
-                                     distance[row - 1][col - 1] + cost) 
+            distance[row][col] = min(distance[row - 1][col] + 1,
+                                     distance[row][col - 1] +
+                                     1,
+                                     distance[row - 1][col - 1] + cost)
     if ratio_calc == True:
         Ratio = ((len(s) + len(t)) - distance[row][col]) / (len(s) + len(t))
         return Ratio
     else:
         return "The strings are {} edits away".format(distance[row][col])
-
 
 
 def are_equivalent(right_a, supposed_a):
@@ -83,7 +82,6 @@ def are_equivalent(right_a, supposed_a):
         return False
     else:
         return True
-
 
 
 if __name__ == "__main__":
