@@ -220,6 +220,7 @@ def generate_answers_en(text, number_possible_answers=4):
         Description : Fonction principale.
         Arguments : 
             - text : La réponse à la question.
+            - number_possible_answers : Nombre de fausses réponses générées.
         Returns : JSON contenant la réponse correcte ainsi qu'une liste avec les réponses alternatives.
     """
 

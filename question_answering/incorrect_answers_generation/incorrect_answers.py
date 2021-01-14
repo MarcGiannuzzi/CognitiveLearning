@@ -10,8 +10,7 @@ def generate_answers(full_answer, lang="english"):
             - voc : Objet vocabulaire d'une langue.
             - number_possible_answers : Nombre de réponses (fausses) générées.
         Returns : (blank_answer, possible_answers)
-            - true_answer : La vraie réponse.
-            - possible_answers : Dictionnaire contenant LA bonne réponse et une liste de plusieurs autres réponses fausses.
+            - all_answers : Dictionnaire contenant LA bonne réponse et une liste de plusieurs autres réponses fausses.
     """
     if lang == "french":
         all_answers = generate_answers_fr(full_answer)
