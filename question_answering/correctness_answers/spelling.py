@@ -25,8 +25,13 @@ def clean_sentence(sentence):
             sentence.remove(word)
 
     sentence = " ".join(sentence)
-
+    sentence = remove_accents(sentence)
     return sentence
+
+
+def remove_accents(input_str):
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
 def levenshtein_ratio_and_distance(s, t, ratio_calc=False):
