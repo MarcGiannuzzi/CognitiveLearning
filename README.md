@@ -11,3 +11,5 @@ https://drive.google.com/file/d/1bzEX3YKrjclIAcg_DzEwtHNXho-IgXEI/view?usp=shari
 
 
 Le dossier data doit se trouver à la racine du dossier.
+
+![](presentation_cognitive_learning.gif)
