@@ -1,0 +1,6 @@
+En CMD :
+
+cd dossier_contenant_le_code 
+set FLASK_APP=api_question_answering.py
+set FLASK_ENV=development
+python -m flask run
