@@ -88,6 +88,3 @@ if __name__ == "__main__":
 
     questions_answers = qg_pipeline(text_fr)
     print(questions_answers)
-    # [{'answer': '1904', 'question': 'When was the team de France de football created?'},
-    # {'answer': 'Les Tricolores ou encore Les Bleus', 'question': 'What are the last names of the team that represents the France in the competitions internationals masculines de football?'},
-    # {'answer': 'la plus usitée', 'question': 'What is the name of the last appellation of France de football?'}]
