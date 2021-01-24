@@ -46,12 +46,16 @@ def modify_date(answer_date):
         Returns : La date modifiée (au hasard)
 
     """
-    int_confidence = 3
-    new_answer_year = answer_date.year + \
-        random.randint(-int_confidence, int_confidence)
-    new_answer_month = answer_date.month + random.randint(0, int_confidence)
-    new_answer_day = answer_date.day + random.randint(0, int_confidence)
-    return datetime.datetime(new_answer_year, new_answer_month, new_answer_day)
+    try:
+        int_confidence = 3
+        new_answer_year = answer_date.year + \
+            random.randint(-int_confidence, int_confidence)
+        new_answer_month = answer_date.month + \
+            random.randint(0, int_confidence)
+        new_answer_day = answer_date.day + random.randint(0, int_confidence)
+        return datetime.datetime(new_answer_year, new_answer_month, new_answer_day)
+    except:
+        print("Error in modify_date")
 
 
 def generate_answers_fr(full_answer, number_possible_answers=4):
@@ -64,43 +68,41 @@ def generate_answers_fr(full_answer, number_possible_answers=4):
         Returns : (blank_answer, possible_answers)
             - true_false_answers : Dictionnaire contenant LA bonne réponse et une liste de plusieurs autres réponses fausses.
     """
-    full_answer = full_answer.lower()
-    possible_answers = []
-    doc = NLP_FR(full_answer)
-    important_words_answer = [X for X in doc if X.tag_[
-        :4] not in AVOID_TAGS]  # 4 == taille des AVOID_TAGS
-    important_word_answer = important_words_answer[random.randint(
-        0, len(important_words_answer) - 1)]
-    # Faire en sorte que le replace puisse targeter l'unique élément à prendre en compte, et non tous ou un/plusieurs mauvais.
-    true_answer = important_word_answer.text
-    if is_date(true_answer):
-        for _ in range(number_possible_answers):
-            answer_date = parse(true_answer)
-            new_date = modify_date(answer_date)
-            possible_answer = full_answer.replace(answer_date, new_date, 1)
-            possible_answers.append(possible_answer)
-    else:
-        random_indices = []
-        for _ in range(number_possible_answers):
-            similar_words = FRENCH_MODEL.most_similar(
-                true_answer)
-            random_position_answer = random.randint(
-                0, int((len(similar_words) - 1) / 2))
-            while random_position_answer in random_indices:
+    try:
+        full_answer = full_answer.lower()
+        possible_answers = []
+        doc = NLP_FR(full_answer)
+        important_words_answer = [X for X in doc if X.tag_[
+            :4] not in AVOID_TAGS]  # 4 == taille des AVOID_TAGS
+        important_word_answer = important_words_answer[random.randint(
+            0, len(important_words_answer) - 1)]
+        # Faire en sorte que le replace puisse targeter l'unique élément à prendre en compte, et non tous ou un/plusieurs mauvais.
+        true_answer = important_word_answer.text
+        if is_date(true_answer):
+            for _ in range(number_possible_answers):
+                answer_date = parse(true_answer)
+                new_date = modify_date(answer_date)
+                possible_answer = full_answer.replace(answer_date, new_date, 1)
+                possible_answers.append(possible_answer)
+        else:
+            random_indices = []
+            for _ in range(number_possible_answers):
+                similar_words = FRENCH_MODEL.most_similar(
+                    true_answer)
                 random_position_answer = random.randint(
                     0, int((len(similar_words) - 1) / 2))
-            random_indices.append(random_position_answer)
-            other_answer = similar_words[random_position_answer][0].replace(
-                "_", " ")
-            possible_answer = full_answer.replace(true_answer, other_answer, 1)
-            possible_answers.append(possible_answer)
+                while random_position_answer in random_indices:
+                    random_position_answer = random.randint(
+                        0, int((len(similar_words) - 1) / 2))
+                random_indices.append(random_position_answer)
+                other_answer = similar_words[random_position_answer][0].replace(
+                    "_", " ")
+                possible_answer = full_answer.replace(
+                    true_answer, other_answer, 1)
+                possible_answers.append(possible_answer)
 
-    true_false_answers = {"correct_answer": full_answer,
-                          "incorrect_answers": possible_answers}
-    return true_false_answers
-
-
-if __name__ == "__main__":
-    text = "J'irai manger chez vous demain soir."
-    incorrect_answers = generate_answers_fr(text)
-    print("incorrect_answers : ", incorrect_answers)
+        true_false_answers = {"correct_answer": full_answer,
+                              "incorrect_answers": possible_answers}
+        return true_false_answers
+    except:
+        print("Error in generate_answers_fr")

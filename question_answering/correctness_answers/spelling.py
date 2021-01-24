@@ -15,23 +15,29 @@ def clean_sentence(sentence):
             - sentence : Phrase à nettoyer.
         Returns : Phrase nettoyée.
     """
-    regex = re.compile('.\'|([^\s\w]|_|\n)')
-    sentence = regex.sub('', sentence)
-    sentence = sentence.lower()
-    sentence = sentence.split(" ")
+    try:
+        regex = re.compile('.\'|([^\s\w]|_|\n)')
+        sentence = regex.sub('', sentence)
+        sentence = sentence.lower()
+        sentence = sentence.split(" ")
 
-    for word in sentence:
-        if word in STOP_WORDS:
-            sentence.remove(word)
+        for word in sentence:
+            if word in STOP_WORDS:
+                sentence.remove(word)
 
-    sentence = " ".join(sentence)
-    sentence = remove_accents(sentence)
-    return sentence
+        sentence = " ".join(sentence)
+        sentence = remove_accents(sentence)
+        return sentence
+    except:
+        print("Error in clean_sentence")
 
 
 def remove_accents(input_str):
-    nfkd_form = unicodedata.normalize('NFKD', input_str)
-    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    try:
+        nfkd_form = unicodedata.normalize('NFKD', input_str)
+        return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    except:
+        print("Error in remove_accents")
 
 
 def levenshtein_ratio_and_distance(s, t, ratio_calc=False):
@@ -44,33 +50,37 @@ def levenshtein_ratio_and_distance(s, t, ratio_calc=False):
             Pour tous i et j, distance[i,j] contiendra la distance Levenshtein entre les premiers i caractères de s et les  j premiers caractères de t.
         Returns : Le ratio s'il a a pu être calculé, un string sinon.
     """
-    rows = len(s) + 1
-    cols = len(t) + 1
-    distance = np.zeros((rows, cols), dtype=int)
+    try:
+        rows = len(s) + 1
+        cols = len(t) + 1
+        distance = np.zeros((rows, cols), dtype=int)
 
-    for i in range(1, rows):
-        for k in range(1, cols):
-            distance[i][0] = i
-            distance[0][k] = k
+        for i in range(1, rows):
+            for k in range(1, cols):
+                distance[i][0] = i
+                distance[0][k] = k
 
-    for col in range(1, cols):
-        for row in range(1, rows):
-            if s[row - 1] == t[col - 1]:
-                cost = 0
-            else:
-                if ratio_calc == True:
-                    cost = 2
+        for col in range(1, cols):
+            for row in range(1, rows):
+                if s[row - 1] == t[col - 1]:
+                    cost = 0
                 else:
-                    cost = 1
-            distance[row][col] = min(distance[row - 1][col] + 1,
-                                     distance[row][col - 1] +
-                                     1,
-                                     distance[row - 1][col - 1] + cost)
-    if ratio_calc == True:
-        Ratio = ((len(s) + len(t)) - distance[row][col]) / (len(s) + len(t))
-        return Ratio
-    else:
-        return "The strings are {} edits away".format(distance[row][col])
+                    if ratio_calc == True:
+                        cost = 2
+                    else:
+                        cost = 1
+                distance[row][col] = min(distance[row - 1][col] + 1,
+                                         distance[row][col - 1] +
+                                         1,
+                                         distance[row - 1][col - 1] + cost)
+        if ratio_calc == True:
+            Ratio = ((len(s) + len(t)) -
+                     distance[row][col]) / (len(s) + len(t))
+            return Ratio
+        else:
+            return "The strings are {} edits away".format(distance[row][col])
+    except:
+        print("Error in levenshtein_ratio_and_distance")
 
 
 def are_equivalent(right_a, supposed_a):
@@ -81,12 +91,15 @@ def are_equivalent(right_a, supposed_a):
             - supposed_a : Réponse de l'utilisateur.
         Returns : True si les réponses sont syntaxiquement équivalentes, False sinon.
     """
-    levenshtein_ratio = levenshtein_ratio_and_distance(
-        right_a, supposed_a, ratio_calc=True)
-    if levenshtein_ratio < MIN_LEVENSHTEIN_RATIO:
-        return False
-    else:
-        return True
+    try:
+        levenshtein_ratio = levenshtein_ratio_and_distance(
+            right_a, supposed_a, ratio_calc=True)
+        if levenshtein_ratio < MIN_LEVENSHTEIN_RATIO:
+            return False
+        else:
+            return True
+    except:
+        print("Error in are_equivalent")
 
 
 if __name__ == "__main__":

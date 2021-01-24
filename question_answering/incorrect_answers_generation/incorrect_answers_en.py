@@ -19,22 +19,24 @@ if not os.path.exists(tmp_file_en):
 ENGLISH_MODEL = KeyedVectors.load_word2vec_format(tmp_file_en)
 
 
-def getNEStartIndexs(doc):
+def getNEStartIndices(doc):
     """
         Description : Fonction retournant l'index de chaque entités dans le texte
         Arguments : 
             - doc : texte de la reponse, auquel on a appliqué la fonction NLP_EN afin d'utiliser des fonctionnalités SPACY.
         Returns : Dictionnaire contenant toutes les entités du text.
     """
+    try:
+        neStarts = {}
+        for ne in doc.ents:
+            neStarts[ne.start] = ne
 
-    neStarts = {}
-    for ne in doc.ents:
-        neStarts[ne.start] = ne
-
-    return neStarts
+        return neStarts
+    except:
+        print("Error in getNEStartIndices")
 
 
-def addWordsForParagrapgh(newWords, text):
+def addWordsForParagraph(newWords, text):
     """
         Description : Fonction permettant de selectionner seulement les mots ou groupe de mots importants.
         Arguments : 
@@ -42,39 +44,41 @@ def addWordsForParagrapgh(newWords, text):
             - text : La réponse à la question.
         Returns : Pas de retours. La fonction modifie la variable newWords en entrée.
     """
+    try:
+        doc = NLP_EN(text)
 
-    doc = NLP_EN(text)
+        neStarts = getNEStartIndices(doc)
 
-    neStarts = getNEStartIndexs(doc)
+        # index of word in spacy doc text
+        i = 0
 
-    # index of word in spacy doc text
-    i = 0
-
-    while (i < len(doc)):
-        # If the token is a start of a Named Entity, add it and push to index to end of the NE
-        if (i in neStarts):
-            word = neStarts[i]
-            # add word
-
-            newWords.append([word.text,
-                             word.label_,
-                             None,
-                             None,
-                             None])
-            i = neStarts[i].end - 1
-        # If not a NE, add the word if it's not a stopword or a non-alpha (not regular letters)
-        else:
-            if (doc[i].is_stop == False and doc[i].is_alpha == True):
-                word = doc[i]
-
-                wordLen = 1
+        while (i < len(doc)):
+            # If the token is a start of a Named Entity, add it and push to index to end of the NE
+            if (i in neStarts):
+                word = neStarts[i]
+                # add word
 
                 newWords.append([word.text,
+                                 word.label_,
                                  None,
-                                 word.pos_,
-                                 word.tag_,
-                                 word.dep_])
-        i += 1
+                                 None,
+                                 None])
+                i = neStarts[i].end - 1
+            # If not a NE, add the word if it's not a stopword or a non-alpha (not regular letters)
+            else:
+                if (doc[i].is_stop == False and doc[i].is_alpha == True):
+                    word = doc[i]
+
+                    wordLen = 1
+
+                    newWords.append([word.text,
+                                     None,
+                                     word.pos_,
+                                     word.tag_,
+                                     word.dep_])
+            i += 1
+    except:
+        print("Error in addWordsForParagraph")
 
 
 def generateDf(text):
@@ -84,14 +88,16 @@ def generateDf(text):
             - text : La réponse à la question.
         Returns : Dataframe.
     """
+    try:
+        words = []
+        addWordsForParagraph(words, text)
 
-    words = []
-    addWordsForParagrapgh(words, text)
+        wordColums = ['text', 'NER', 'POS', 'TAG', 'DEP']
+        df = pd.DataFrame(words, columns=wordColums)
 
-    wordColums = ['text', 'NER', 'POS', 'TAG', 'DEP']
-    df = pd.DataFrame(words, columns=wordColums)
-
-    return df
+        return df
+    except:
+        print("Error in generateDf")
 
 
 def blankAnswer(firstTokenIndex, lastTokenIndex, sentStart, sentEnd, doc):
@@ -105,16 +111,18 @@ def blankAnswer(firstTokenIndex, lastTokenIndex, sentStart, sentEnd, doc):
             - doc : texte de la reponse, auquel on a appliqué la fonction NLP_EN afin d'utiliser des fonctionnalités SPACY.            
         Returns : Phrase d'entrée avec un BLANK au niveau du toekn à remplacer.
     """
+    try:
+        leftPartStart = doc[sentStart].idx
+        leftPartEnd = doc[firstTokenIndex].idx
+        rightPartStart = doc[lastTokenIndex].idx + len(doc[lastTokenIndex])
+        rightPartEnd = doc[sentEnd - 1].idx + len(doc[sentEnd - 1])
 
-    leftPartStart = doc[sentStart].idx
-    leftPartEnd = doc[firstTokenIndex].idx
-    rightPartStart = doc[lastTokenIndex].idx + len(doc[lastTokenIndex])
-    rightPartEnd = doc[sentEnd - 1].idx + len(doc[sentEnd - 1])
+        question = doc.text[leftPartStart:leftPartEnd] + \
+            '___' + doc.text[rightPartStart:rightPartEnd]
 
-    question = doc.text[leftPartStart:leftPartEnd] + \
-        '___' + doc.text[rightPartStart:rightPartEnd]
-
-    return question
+        return question
+    except:
+        print("Error in blankAnswer")
 
 
 def addQuestions(answers, text):
@@ -125,38 +133,40 @@ def addQuestions(answers, text):
             - text : réponse correcte.
         Returns : Liste de dictionnaires comme suit : [{'question': '___ has won the world cup in 2018', 'answer': 'France'}]
     """
+    try:
+        doc = NLP_EN(text)
+        currAnswerIndex = 0
+        qaPair = []
 
-    doc = NLP_EN(text)
-    currAnswerIndex = 0
-    qaPair = []
+        # Check wheter each token is the next answer
+        for sent in doc.sents:
+            for token in sent:
 
-    # Check wheter each token is the next answer
-    for sent in doc.sents:
-        for token in sent:
+                # If all the answers have been found, stop looking
+                if currAnswerIndex >= len(answers):
+                    break
 
-            # If all the answers have been found, stop looking
-            if currAnswerIndex >= len(answers):
-                break
+                # In the case where the answer is consisted of more than one token, check the following tokens as well.
+                answerDoc = NLP_EN(answers[currAnswerIndex]['word'])
+                answerIsFound = True
 
-            # In the case where the answer is consisted of more than one token, check the following tokens as well.
-            answerDoc = NLP_EN(answers[currAnswerIndex]['word'])
-            answerIsFound = True
+                for j in range(len(answerDoc)):
+                    if token.i + j >= len(doc) or doc[token.i + j].text != answerDoc[j].text:
+                        answerIsFound = False
 
-            for j in range(len(answerDoc)):
-                if token.i + j >= len(doc) or doc[token.i + j].text != answerDoc[j].text:
-                    answerIsFound = False
+                # If the current token is corresponding with the answer, add it
+                if answerIsFound:
+                    question = blankAnswer(
+                        token.i, token.i + len(answerDoc) - 1, sent.start, sent.end, doc)
 
-            # If the current token is corresponding with the answer, add it
-            if answerIsFound:
-                question = blankAnswer(
-                    token.i, token.i + len(answerDoc) - 1, sent.start, sent.end, doc)
+                    qaPair.append(
+                        {'question': question, 'answer': answers[currAnswerIndex]['word']})
 
-                qaPair.append(
-                    {'question': question, 'answer': answers[currAnswerIndex]['word']})
+                    currAnswerIndex += 1
 
-                currAnswerIndex += 1
-
-    return qaPair
+        return qaPair
+    except:
+        print("Error in addQuestions")
 
 
 def generate_distractors(answer, count):
@@ -167,21 +177,23 @@ def generate_distractors(answer, count):
             - count : Ignore les tokens non connus ou non.
         Returns : Liste de mots similaires à celui en entrée.
     """
-
-    answer = str.lower(answer)
-
-    # Extracting closest words for the answer.
     try:
-        closestWords = ENGLISH_MODEL.most_similar(
-            positive=[answer], topn=count)
+        answer = str.lower(answer)
+
+        # Extracting closest words for the answer.
+        try:
+            closestWords = ENGLISH_MODEL.most_similar(
+                positive=[answer], topn=count)
+        except:
+            # In case the word is not in the vocabulary, or other problem not loading embeddings
+            return []
+
+        # Return count many distractors
+        distractors = list(map(lambda x: x[0], closestWords))[0:count]
+
+        return distractors
     except:
-        # In case the word is not in the vocabulary, or other problem not loading embeddings
-        return []
-
-    # Return count many distractors
-    distractors = list(map(lambda x: x[0], closestWords))[0:count]
-
-    return distractors
+        print("Error in generate_distractors")
 
 
 def addDistractors(qaPairs, count):
@@ -192,12 +204,14 @@ def addDistractors(qaPairs, count):
             - count : nombre de mots similaires à générer.
         Returns : dictionnaire comme suit : {'question': 'France has won the world cup in ___', 'answer': '2018', 'distractors': ['2022', '2016', '2014', '2019']}
     """
+    try:
+        for qaPair in qaPairs:
+            distractors = generate_distractors(qaPair['answer'], count)
+            qaPair['distractors'] = distractors
 
-    for qaPair in qaPairs:
-        distractors = generate_distractors(qaPair['answer'], count)
-        qaPair['distractors'] = distractors
-
-    return qaPairs
+        return qaPairs
+    except:
+        print("Error in addDistractors")
 
 
 def selectWords(df):
@@ -207,12 +221,14 @@ def selectWords(df):
             - df : dataframe.
         Returns : Liste de mots à remplacer.
     """
+    try:
+        labeledAnswers = []
+        for i in range(df.shape[0]):
+            labeledAnswers.append({'word': df.iloc[i]['text']})
 
-    labeledAnswers = []
-    for i in range(df.shape[0]):
-        labeledAnswers.append({'word': df.iloc[i]['text']})
-
-    return labeledAnswers
+        return labeledAnswers
+    except:
+        print("Error in selectWords")
 
 
 def generate_answers_en(text, number_possible_answers=4):
@@ -223,41 +239,38 @@ def generate_answers_en(text, number_possible_answers=4):
             - number_possible_answers : Nombre de fausses réponses générées.
         Returns : JSON contenant la réponse correcte ainsi qu'une liste avec les réponses alternatives.
     """
+    try:
+        test = json.dumps({'correct_answer': text,
+                           'incorrect_answers': []
+                           })
 
-    test = json.dumps({'correct_answer': text,
-                       'incorrect_answers': []
-                       })
+        test_json = json.loads(test)
 
-    test_json = json.loads(test)
+        df = generateDf(text)
+        if df.empty:
+            print('DataFrame is empty!')
 
-    df = generateDf(text)
-    if df.empty:
-        print('DataFrame is empty!')
+        else:
+            labeledAnswers = selectWords(df)
+            qaPairs = addQuestions(labeledAnswers, text)
 
-    else:
-        labeledAnswers = selectWords(df)
-        qaPairs = addQuestions(labeledAnswers, text)
+            # all words selected will be replaced
+            questions = addDistractors(
+                qaPairs[:len(df)], number_possible_answers)
 
-        # all words selected will be replaced
-        questions = addDistractors(qaPairs[:len(df)], number_possible_answers)
+            counter = 0
+            incorrect_answers = test_json["incorrect_answers"]
+            for question in questions:
+                for question_distractor in question['distractors']:
+                    if counter < number_possible_answers:
+                        incorrect_answer = question['question'].replace(
+                            '___', question_distractor)
 
-        counter = 0
-        incorrect_answers = test_json["incorrect_answers"]
-        for question in questions:
-            for question_distractor in question['distractors']:
-                if counter < number_possible_answers:
-                    incorrect_answer = question['question'].replace(
-                        '___', question_distractor)
+                        incorrect_answers.append((incorrect_answer))
+                        counter += 1
 
-                    incorrect_answers.append((incorrect_answer))
-                    counter += 1
+        json_final = json.dumps(test_json)
 
-    json_final = json.dumps(test_json)
-
-    return json_final
-
-
-if __name__ == "__main__":
-    text = "France has won the world cup in 2018"
-    incorrect_answers = generate_answers_en(text)
-    print("incorrect_answers : ", incorrect_answers)
+        return json_final
+    except:
+        print("Error in generate_answers_en")
