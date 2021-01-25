@@ -1,0 +1,169 @@
+{
+	"info": {
+		"_postman_id": "81466cd0-003a-4f4b-8d1f-dc4bd1e932d3",
+		"name": "CognitiveLearningCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get_questions_answers_fr",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\": \"Depuis les débuts de l’informatique, l’homme cherche à communiquer avec les machines. Si les nombreux langages de programmation permettent une forme d’échange entre l’homme et la machine, on aimerait que cette communication se fasse de façon plus naturelle. Pour que cela soit possible, il faut d’abord que la machine “comprenne” ce que l’utilisateur lui dit puis qu’elle soit capable de répondre d’une manière compréhensible par l’homme. La discipline dernière ce processus s’appelle le Natural Language Processing (NLP) ou Traitement Automatique du Langage Naturel (TALN) en français. Elle étudie la compréhension, la manipulation et la génération du langage naturel par les machines. Par langage naturel, on entend le langage utilisé par les humains dans leur communication de tous les jours par opposition aux langages artificiels comme les langages de programmation ou les notations mathématiques.\"\r\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/question_answering/get_questions_answers",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"question_answering",
+						"get_questions_answers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_questions_answers_en",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\": \"Natural language processing (NLP) is a subfield of linguistics, computer science, and artificial intelligence concerned with the interactions between computers and human language, in particular how to program computers to process and analyze large amounts of natural language data. The result is a computer capable of understanding the contents of documents, including the contextual nuances of the language within them. The technology can then accurately extract information and insights contained in the documents as well as categorize and organize the documents themselves. Challenges in natural language processing frequently involve speech recognition, natural language understanding, and natural-language generation.\"\r\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/question_answering/get_questions_answers",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"question_answering",
+						"get_questions_answers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "is_answer_correct",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"true_answer\":\"Des données\", \r\n    \"false_answer\":\"la donnée\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/question_answering/is_answer_correct",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"question_answering",
+						"is_answer_correct"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_incorrect_answers_fr",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\":\"Demain nous parlerons du traitement du langage naturel\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/question_answering/create_incorrect_answers",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"question_answering",
+						"create_incorrect_answers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_incorrect_answers_en",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\":\"Tomorrow we will talk about natural language processing\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/question_answering/create_incorrect_answers",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"question_answering",
+						"create_incorrect_answers"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

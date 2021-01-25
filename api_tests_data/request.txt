@@ -1,1 +1,0 @@
-curl localhost:5000/question_answering/ -H 'Content-Type:application/json' -d @api_tests_data/ 
